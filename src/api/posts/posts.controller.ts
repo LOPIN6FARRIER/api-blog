@@ -332,35 +332,61 @@ const FULL_SELECT_SQL = `
   LEFT JOIN events e ON p.id = e.id AND p.type = 'event'
 `;
 
-function buildListQuery(q: PostsQuery) {
-  const where: string[] = [];
+function buildListQuery(q: PostsQuery, offset: number) {
   const params: unknown[] = [];
+  const where = buildPostsWhere(q, params);
+
+  let sql = FULL_SELECT_SQL;
+  if (where.length) sql += " WHERE " + where.join(" AND ");
+  sql += " ORDER BY p.created_at DESC";
+
+  if (q.limit !== undefined) {
+    params.push(Number(q.limit));
+    sql += ` LIMIT $${params.length}`;
+  }
+
+  if (offset !== undefined) {
+    params.push(offset);
+    sql += ` OFFSET $${params.length}`;
+  }
+
+  return { sql, params };
+}
+
+function buildPostsWhere(q: PostsQuery, params: unknown[]) {
+  const where: string[] = [];
 
   if (q.type) {
     const types = q.type.includes(",")
       ? q.type.split(",").map((t) => t.trim())
       : [q.type.trim()];
+
+    const placeholders = types.map((_, i) => `$${params.length + i + 1}`);
     params.push(...types);
-    where.push(
-      `p.type = ANY(ARRAY[${types.map((_, i) => `$${params.length - types.length + i + 1}::post_type`).join(", ")}])`,
-    );
+
+    where.push(`p.type = ANY(ARRAY[${placeholders.join(", ")}]::post_type[])`);
   }
+
   if (q.status) {
     params.push(q.status);
     where.push(`p.status = $${params.length}`);
   }
+
   if (q.featured !== undefined) {
     params.push(q.featured);
     where.push(`p.featured = $${params.length}`);
   }
+
   if (q.category) {
     params.push(q.category);
     where.push(`p.category = $${params.length}`);
   }
+
   if (q.tag) {
     params.push(q.tag);
     where.push(`p.tags @> ARRAY[$${params.length}]::text[]`);
   }
+
   if (q.q) {
     params.push(`%${q.q}%`);
     where.push(
@@ -368,18 +394,14 @@ function buildListQuery(q: PostsQuery) {
     );
   }
 
-  let sql = FULL_SELECT_SQL;
-  if (where.length) sql += " WHERE " + where.join(" AND ");
-  sql += " ORDER BY p.created_at DESC";
+  return where;
+}
+function buildCountQuery(q: PostsQuery) {
+  const params: unknown[] = [];
+  const where = buildPostsWhere(q, params);
 
-  if (q.limit) {
-    params.push(Number(q.limit));
-    sql += ` LIMIT $${params.length}`;
-  }
-  if (q.offset) {
-    params.push(Number(q.offset));
-    sql += ` OFFSET $${params.length}`;
-  }
+  let sql = `SELECT COUNT(*)::int AS total FROM posts p`;
+  if (where.length) sql += " WHERE " + where.join(" AND ");
 
   return { sql, params };
 }
@@ -415,8 +437,16 @@ async function fetchGalleryImages(
 
 export async function getPosts(q: PostsQuery): Promise<ControllerResult> {
   try {
-    const { sql, params } = buildListQuery(q);
+    const limit: number = Number(q.limit);
+    const page: number = Number(q.page);
+    const offset: number = (page - 1) * limit;
+    const { sql, params } = buildListQuery(q, offset);
     const res = await query(sql, params);
+    // 2. Count
+    const countQuery = buildCountQuery(q);
+    const countRes = await query(countQuery.sql, countQuery.params);
+
+    const totalCount = countRes.rows[0].total as number;
 
     // Get gallery IDs to fetch their images
     const galleryIds = res.rows
@@ -433,14 +463,20 @@ export async function getPosts(q: PostsQuery): Promise<ControllerResult> {
       return transformRowToPost(row);
     });
 
+    const currentPage = page;
+    const totalPages = Math.ceil(totalCount / limit);
+    const hasMorePages = offset + limit < totalCount;
+
     return createSuccessResult(
       "Posts retrieved",
       posts,
       undefined,
       200,
-      undefined,
-      undefined,
-      res.rowCount || undefined,
+      currentPage,
+      totalPages,
+      posts.length,
+      totalCount,
+      hasMorePages,
     );
   } catch (error) {
     logger.error({ err: error }, "Error in getPosts");

@@ -28,7 +28,6 @@ export function createSuccessResult<T>(
   return {
     success: true,
     message,
-    data,
     error,
     statusCode,
     currentPage,
@@ -36,6 +35,7 @@ export function createSuccessResult<T>(
     totalItems,
     totalCount,
     hasMorePages,
+    data,
   };
 }
 
@@ -97,10 +97,6 @@ export async function sendResponse<TValidation = any, TResponse = any>(
       message: controllerResult.message,
     };
 
-    if (controllerResult.data !== undefined) {
-      response.data = controllerResult.data;
-    }
-
     if (controllerResult.error) {
       response.error = controllerResult.error;
     }
@@ -115,6 +111,13 @@ export async function sendResponse<TValidation = any, TResponse = any>(
 
     if (controllerResult.totalPages !== undefined) {
       response.totalPages = controllerResult.totalPages;
+    }
+    if (controllerResult.hasMorePages !== undefined) {
+      response.hasMorePages = controllerResult.hasMorePages;
+    }
+
+    if (controllerResult.data !== undefined) {
+      response.data = controllerResult.data;
     }
 
     res.status(statusCode).json(response);
