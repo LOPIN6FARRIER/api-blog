@@ -55,6 +55,14 @@ interface DbRow {
   duration?: string | null;
   music_cover_url?: string | null;
   music_description?: string | null;
+  music_type?: string | null;
+  spotify_id?: string | null;
+  spotify_url?: string | null;
+  apple_music_url?: string | null;
+  youtube_url?: string | null;
+  release_date?: string | null;
+  total_tracks?: number | null;
+  tracks?: any | null;
   // Video
   video_url?: string | null;
   embed_url?: string | null;
@@ -99,8 +107,32 @@ interface DbRow {
   registration_url?: string | null;
   price?: string | null;
   capacity?: number | null;
+  // Recommendation
+  recommendation_subject?: string | null;
+  recommendation_type?: string | null;
+  recommendation_description?: string | null;
+  recommendation_cover_url?: string | null;
+  recommendation_cover_alt?: string | null;
+  recommendation_rating?: number | null;
+  recommendation_external_url?: string | null;
+  recommended_by_user?: boolean | null;
+  recommendation_compact?: boolean | null;
+  // Rating
+  rating_subject?: string | null;
+  rating_item_type?: string | null;
+  rating_cover_url?: string | null;
+  rating_cover_alt?: string | null;
+  rating_value?: number | null;
+  rating_liked?: boolean | null;
+  rating_comment?: string | null;
+  // Ranking
+  ranking_description?: string | null;
+  ranking_cover_url?: string | null;
+  ranking_cover_alt?: string | null;
   // Gallery images (populated separately)
   gallery_images?: ImageMedia[];
+  // Ranking items (populated separately)
+  ranking_items?: any[];
 }
 
 function transformRowToPost(row: DbRow): Post {
@@ -180,6 +212,14 @@ function transformRowToPost(row: DbRow): Post {
           coverUrl: row.music_cover_url ?? undefined,
         },
         description: row.music_description ?? undefined,
+        musicType: (row.music_type as "track" | "album") ?? undefined,
+        spotifyId: row.spotify_id ?? undefined,
+        spotifyUrl: row.spotify_url ?? undefined,
+        appleMusicUrl: row.apple_music_url ?? undefined,
+        youtubeUrl: row.youtube_url ?? undefined,
+        releaseDate: row.release_date ?? undefined,
+        totalTracks: row.total_tracks ?? undefined,
+        tracks: row.tracks ?? undefined,
       };
 
     case "video":
@@ -275,6 +315,56 @@ function transformRowToPost(row: DbRow): Post {
         capacity: row.capacity ?? undefined,
       };
 
+    case "recommendation":
+      return {
+        ...base,
+        type: "recommendation",
+        subjectTitle: row.recommendation_subject ?? "",
+        recommendationType: (row.recommendation_type as any) ?? "otro",
+        description: row.recommendation_description ?? undefined,
+        coverImage: row.recommendation_cover_url
+          ? {
+              url: row.recommendation_cover_url,
+              alt: row.recommendation_cover_alt ?? "",
+            }
+          : undefined,
+        rating: row.recommendation_rating ?? undefined,
+        externalUrl: row.recommendation_external_url ?? undefined,
+        recommendedByUser: row.recommended_by_user ?? undefined,
+        compact: row.recommendation_compact ?? undefined,
+      };
+
+    case "rating":
+      return {
+        ...base,
+        type: "rating",
+        subjectTitle: row.rating_subject ?? "",
+        itemType: (row.rating_item_type as any) ?? "otro",
+        coverImage: row.rating_cover_url
+          ? {
+              url: row.rating_cover_url,
+              alt: row.rating_cover_alt ?? "",
+            }
+          : undefined,
+        rating: row.rating_value ?? 0,
+        liked: row.rating_liked ?? undefined,
+        comment: row.rating_comment ?? undefined,
+      };
+
+    case "ranking":
+      return {
+        ...base,
+        type: "ranking",
+        description: row.ranking_description ?? undefined,
+        items: row.ranking_items ?? [],
+        coverImage: row.ranking_cover_url
+          ? {
+              url: row.ranking_cover_url,
+              alt: row.ranking_cover_alt ?? "",
+            }
+          : undefined,
+      };
+
     default:
       return base as Post;
   }
@@ -300,6 +390,8 @@ const FULL_SELECT_SQL = `
     -- Music
     m.audio_url, m.audio_title, m.artist, m.album, m.genre, m.duration,
     m.cover_url AS music_cover_url, m.description AS music_description,
+    m.music_type, m.spotify_id, m.spotify_url, m.apple_music_url,
+    m.youtube_url, m.release_date, m.total_tracks, m.tracks,
     -- Video
     v.video_url, v.embed_url, v.thumbnail_url, v.duration AS video_duration,
     v.provider, v.description AS video_description, v.transcript,
@@ -318,7 +410,20 @@ const FULL_SELECT_SQL = `
     e.cover_image_url AS event_cover_url,
     e.start_date, e.end_date, e.location_name, e.location_address,
     e.location_lat, e.location_lng, e.is_virtual, e.virtual_url,
-    e.registration_url, e.price, e.capacity
+    e.registration_url, e.price, e.capacity,
+    -- Recommendation
+    rec.subject_title AS recommendation_subject, rec.recommendation_type,
+    rec.description AS recommendation_description, rec.cover_image_url AS recommendation_cover_url,
+    rec.cover_image_alt AS recommendation_cover_alt, rec.rating AS recommendation_rating,
+    rec.external_url AS recommendation_external_url, rec.recommended_by_user,
+    rec.compact AS recommendation_compact,
+    -- Rating
+    rat.subject_title AS rating_subject, rat.item_type AS rating_item_type,
+    rat.cover_image_url AS rating_cover_url, rat.cover_image_alt AS rating_cover_alt,
+    rat.rating AS rating_value, rat.liked AS rating_liked, rat.comment AS rating_comment,
+    -- Ranking
+    rank.description AS ranking_description, rank.cover_image_url AS ranking_cover_url,
+    rank.cover_image_alt AS ranking_cover_alt
   FROM posts p
   LEFT JOIN articles a ON p.id = a.id AND p.type = 'article'
   LEFT JOIN photos ph ON p.id = ph.id AND p.type = 'photo'
@@ -330,6 +435,9 @@ const FULL_SELECT_SQL = `
   LEFT JOIN links l ON p.id = l.id AND p.type = 'link'
   LEFT JOIN announcements an ON p.id = an.id AND p.type = 'announcement'
   LEFT JOIN events e ON p.id = e.id AND p.type = 'event'
+  LEFT JOIN recommendations rec ON p.id = rec.id AND p.type = 'recommendation'
+  LEFT JOIN ratings rat ON p.id = rat.id AND p.type = 'rating'
+  LEFT JOIN rankings rank ON p.id = rank.id AND p.type = 'ranking'
 `;
 
 function buildListQuery(q: PostsQuery, offset: number) {
@@ -361,10 +469,8 @@ function buildPostsWhere(q: PostsQuery, params: unknown[]) {
       ? q.type.split(",").map((t) => t.trim())
       : [q.type.trim()];
 
-    const placeholders = types.map((_, i) => `$${params.length + i + 1}`);
-    params.push(...types);
-
-    where.push(`p.type = ANY(ARRAY[${placeholders.join(", ")}]::post_type[])`);
+    params.push(types);
+    where.push(`p.type::text = ANY($${params.length}::text[])`);
   }
 
   if (q.status) {
@@ -433,6 +539,43 @@ async function fetchGalleryImages(
   return map;
 }
 
+// Fetch ranking items for a list of ranking post IDs
+async function fetchRankingItems(
+  rankingIds: string[],
+): Promise<Map<string, any[]>> {
+  if (rankingIds.length === 0) return new Map();
+
+  const placeholders = rankingIds.map((_, i) => `$${i + 1}`).join(", ");
+  const res = await query(
+    `SELECT ranking_id, rank, subject_title, item_type, cover_image_url, cover_image_alt, rating, description, external_url, sort_order
+     FROM ranking_items
+     WHERE ranking_id IN (${placeholders})
+     ORDER BY rank ASC, sort_order ASC`,
+    rankingIds,
+  );
+
+  const map = new Map<string, any[]>();
+  for (const row of res.rows) {
+    const items = map.get(row.ranking_id) || [];
+    items.push({
+      rank: row.rank,
+      subjectTitle: row.subject_title,
+      itemType: row.item_type,
+      coverImage: row.cover_image_url
+        ? {
+            url: row.cover_image_url,
+            alt: row.cover_image_alt ?? "",
+          }
+        : undefined,
+      rating: row.rating ?? undefined,
+      description: row.description ?? undefined,
+      externalUrl: row.external_url ?? undefined,
+    });
+    map.set(row.ranking_id, items);
+  }
+  return map;
+}
+
 // ------------------ Controllers ------------------
 
 export async function getPosts(q: PostsQuery): Promise<ControllerResult> {
@@ -455,10 +598,20 @@ export async function getPosts(q: PostsQuery): Promise<ControllerResult> {
 
     const galleryImagesMap = await fetchGalleryImages(galleryIds);
 
+    // Get ranking IDs to fetch their items
+    const rankingIds = res.rows
+      .filter((r: DbRow) => r.type === "ranking")
+      .map((r: DbRow) => r.id);
+
+    const rankingItemsMap = await fetchRankingItems(rankingIds);
+
     // Transform rows to Post objects
     const posts: Post[] = res.rows.map((row: DbRow) => {
       if (row.type === "gallery") {
         row.gallery_images = galleryImagesMap.get(row.id) || [];
+      }
+      if (row.type === "ranking") {
+        row.ranking_items = rankingItemsMap.get(row.id) || [];
       }
       return transformRowToPost(row);
     });
@@ -490,8 +643,9 @@ export async function getPosts(q: PostsQuery): Promise<ControllerResult> {
 
 export async function getPost(idOrSlug: string): Promise<ControllerResult> {
   try {
+    // Try to find by ID (if it's a UUID) or by slug
     const res = await query(
-      FULL_SELECT_SQL + " WHERE p.id = $1 OR p.slug = $1 LIMIT 1",
+      FULL_SELECT_SQL + " WHERE (p.id::text = $1 OR p.slug = $1) LIMIT 1",
       [idOrSlug],
     );
 
@@ -505,6 +659,12 @@ export async function getPost(idOrSlug: string): Promise<ControllerResult> {
     if (row.type === "gallery") {
       const imagesMap = await fetchGalleryImages([row.id]);
       row.gallery_images = imagesMap.get(row.id) || [];
+    }
+
+    // If ranking, fetch items
+    if (row.type === "ranking") {
+      const itemsMap = await fetchRankingItems([row.id]);
+      row.ranking_items = itemsMap.get(row.id) || [];
     }
 
     const post = transformRowToPost(row);
@@ -572,7 +732,7 @@ export async function createPost(
       uniqueSlug,
       body.type,
       body.title,
-      "published",
+      body.status,
       body.featured ?? false,
       body.category || null,
       tags,
@@ -582,8 +742,8 @@ export async function createPost(
     const postId = res.rows[0].id;
 
     // Support type-specific payload inserts using the discriminated union `UnifiedCreatePost`
-    const b = body as any;
-    if (body.type === "article") {
+    const b = body;
+    if (b.type === "article") {
       await client.query(
         `INSERT INTO articles (id, excerpt, content, cover_image_url, cover_image_alt, read_time) VALUES ($1,$2,$3,$4,$5,$6)`,
         [
@@ -595,7 +755,7 @@ export async function createPost(
           b.read_time || null,
         ],
       );
-    } else if (body.type === "photo") {
+    } else if (b.type === "photo") {
       await client.query(
         `INSERT INTO photos (id, image_url, image_alt, location, camera, settings) VALUES ($1,$2,$3,$4,$5,$6)`,
         [
@@ -607,7 +767,7 @@ export async function createPost(
           b.settings || null,
         ],
       );
-    } else if (body.type === "gallery") {
+    } else if (b.type === "gallery") {
       await client.query(
         `INSERT INTO galleries (id, description, columns) VALUES ($1,$2,$3)`,
         [postId, b.description || null, b.columns ?? 2],
@@ -621,7 +781,7 @@ export async function createPost(
           );
         }
       }
-    } else if (body.type === "thought") {
+    } else if (b.type === "thought") {
       await client.query(
         `INSERT INTO thoughts (id, content, source, style, mood) VALUES ($1,$2,$3,$4,$5)`,
         [
@@ -632,24 +792,47 @@ export async function createPost(
           b.mood || null,
         ],
       );
-    } else if (body.type === "music") {
-      const audioTitle = b.audio?.title || b.audio_title;
-      const artist = b.audio?.artist || b.artist;
+    } else if (b.type === "music") {
+      // Extract values, supporting both camelCase and snake_case
+      const audioUrl = b.audio_url || b.audio?.url || null;
+      const audioTitle = b.audio_title || b.audio?.title || null;
+      const artist = b.artist || b.audio?.artist || null;
+      const album = b.album || b.audio?.album || null;
+      const genre = b.genre || b.audio?.genre || null;
+      const duration = b.duration || b.audio?.duration || null;
+      const coverUrl = b.cover_url || b.audio?.coverUrl || null;
+      const musicType = b.music_type || b.musicType || null;
+      const spotifyId = b.spotify_id || b.spotifyId || null;
+      const spotifyUrl = b.spotify_url || b.spotifyUrl || null;
+      const appleMusicUrl = b.apple_music_url || b.appleMusicUrl || null;
+      const youtubeUrl = b.youtube_url || b.youtubeUrl || null;
+      const releaseDate = b.release_date || b.releaseDate || null;
+      const totalTracks = b.total_tracks || b.totalTracks || null;
+      const tracks = b.tracks ? JSON.stringify(b.tracks) : null;
+
       await client.query(
-        `INSERT INTO music (id, description, audio_url, audio_title, artist, album, genre, duration, cover_url) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+        `INSERT INTO music (id, description, audio_url, audio_title, artist, album, genre, duration, cover_url, music_type, spotify_id, spotify_url, apple_music_url, youtube_url, release_date, total_tracks, tracks) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
         [
           postId,
           b.description || null,
-          b.audio?.url || b.audio_url || null,
-          audioTitle || null,
-          artist || null,
-          b.audio?.album || b.album || null,
-          b.audio?.genre || b.genre || null,
-          b.audio?.duration || b.duration || null,
-          b.audio?.coverUrl || b.cover_url || null,
+          audioUrl,
+          audioTitle,
+          artist,
+          album,
+          genre,
+          duration,
+          coverUrl,
+          musicType,
+          spotifyId,
+          spotifyUrl,
+          appleMusicUrl,
+          youtubeUrl,
+          releaseDate,
+          totalTracks,
+          tracks,
         ],
       );
-    } else if (body.type === "video") {
+    } else if (b.type === "video") {
       await client.query(
         `INSERT INTO videos (id, video_url, embed_url, thumbnail_url, duration, provider, description, transcript) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
         [
@@ -663,21 +846,21 @@ export async function createPost(
           b.transcript || null,
         ],
       );
-    } else if (body.type === "project") {
+    } else if (b.type === "project") {
       await client.query(
         `INSERT INTO projects (id, description, technologies, status, live_url, repo_url, cover_image_url, cover_image_alt) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
         [
           postId,
           b.description || null,
           b.technologies || null,
-          b.status || null,
+          b.project_status || null,
           b.live_url || null,
           b.repo_url || null,
           b.cover_image_url || null,
           b.cover_image_alt || null,
         ],
       );
-    } else if (body.type === "link") {
+    } else if (b.type === "link") {
       await client.query(
         `INSERT INTO links (id, url, description, site_name, image_url, image_alt) VALUES ($1,$2,$3,$4,$5,$6)`,
         [
@@ -686,10 +869,10 @@ export async function createPost(
           b.description || null,
           b.site_name || null,
           b.image_url || null,
-          b.image_alt || null,
+          b.description || null,
         ],
       );
-    } else if (body.type === "announcement") {
+    } else if (b.type === "announcement") {
       await client.query(
         `INSERT INTO announcements (id, content, priority, cta_text, cta_url, expires_at) VALUES ($1,$2,$3,$4,$5,$6)`,
         [
@@ -701,7 +884,7 @@ export async function createPost(
           b.expires_at || null,
         ],
       );
-    } else if (body.type === "event") {
+    } else if (b.type === "event") {
       await client.query(
         `INSERT INTO events (id, description, content, cover_image_url, start_date, end_date, location_name, location_address, location_lat, location_lng, is_virtual, virtual_url, registration_url, price, capacity) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
         [
@@ -722,6 +905,67 @@ export async function createPost(
           b.capacity || null,
         ],
       );
+    } else if (b.type === "recommendation") {
+      await client.query(
+        `INSERT INTO recommendations (id, subject_title, recommendation_type, description, cover_image_url, cover_image_alt, rating, external_url, recommended_by_user, compact) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+        [
+          postId,
+          b.subject_title || null,
+          b.recommendation_type || null,
+          b.description || null,
+          b.cover_image_url || null,
+          b.cover_image_alt || null,
+          b.rating || null,
+          b.external_url || null,
+          b.recommended_by_user ?? true,
+          b.compact ?? false,
+        ],
+      );
+    } else if (b.type === "rating") {
+      await client.query(
+        `INSERT INTO ratings (id, subject_title, item_type, cover_image_url, cover_image_alt, rating, liked, comment) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+        [
+          postId,
+          b.subject_title || null,
+          b.item_type || null,
+          b.cover_image_url || null,
+          b.cover_image_alt || null,
+          b.rating || 0,
+          b.liked ?? false,
+          b.comment || null,
+        ],
+      );
+    } else if (b.type === "ranking") {
+      await client.query(
+        `INSERT INTO rankings (id, description, cover_image_url, cover_image_alt) VALUES ($1,$2,$3,$4)`,
+        [
+          postId,
+          b.description || null,
+          b.cover_image_url || null,
+          b.cover_image_alt || null,
+        ],
+      );
+      // Insert ranking items
+      if (Array.isArray(b.items)) {
+        for (let i = 0; i < b.items.length; i++) {
+          const item = b.items[i];
+          await client.query(
+            `INSERT INTO ranking_items (ranking_id, rank, subject_title, item_type, cover_image_url, cover_image_alt, rating, description, external_url, sort_order) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+            [
+              postId,
+              item.rank,
+              item.subject_title,
+              item.item_type,
+              item.cover_image_url || null,
+              item.cover_image_alt || null,
+              item.rating || null,
+              item.description || null,
+              item.external_url || null,
+              item.sort_order ?? i,
+            ],
+          );
+        }
+      }
     }
 
     await client.query("COMMIT");
@@ -756,7 +1000,7 @@ export async function updatePost(
       return createErrorResult("Not found", "Post not found", 404);
     }
     const currentType = postRes.rows[0].type;
-    const b = body as any;
+    const b = body;
 
     // Actualizar campos base de posts
     const fields: string[] = [];
@@ -831,7 +1075,24 @@ export async function updatePost(
       const audioTitle = b.audio?.title || b.audio_title;
       const artist = b.audio?.artist || b.artist;
       await client.query(
-        `UPDATE music SET description = COALESCE($1, description), audio_url = COALESCE($2, audio_url), audio_title = COALESCE($3, audio_title), artist = COALESCE($4, artist), album = COALESCE($5, album), genre = COALESCE($6, genre), duration = COALESCE($7, duration), cover_url = COALESCE($8, cover_url) WHERE id = $9`,
+        `UPDATE music SET 
+          description = COALESCE($1, description), 
+          audio_url = COALESCE($2, audio_url), 
+          audio_title = COALESCE($3, audio_title), 
+          artist = COALESCE($4, artist), 
+          album = COALESCE($5, album), 
+          genre = COALESCE($6, genre), 
+          duration = COALESCE($7, duration), 
+          cover_url = COALESCE($8, cover_url),
+          music_type = COALESCE($9, music_type),
+          spotify_id = COALESCE($10, spotify_id),
+          spotify_url = COALESCE($11, spotify_url),
+          apple_music_url = COALESCE($12, apple_music_url),
+          youtube_url = COALESCE($13, youtube_url),
+          release_date = COALESCE($14, release_date),
+          total_tracks = COALESCE($15, total_tracks),
+          tracks = COALESCE($16, tracks)
+        WHERE id = $17`,
         [
           b.description,
           b.audio?.url || b.audio_url,
@@ -841,6 +1102,14 @@ export async function updatePost(
           b.audio?.genre || b.genre,
           b.audio?.duration || b.duration,
           b.audio?.coverUrl || b.cover_url,
+          b.musicType,
+          b.spotifyId,
+          b.spotifyUrl,
+          b.appleMusicUrl,
+          b.youtubeUrl,
+          b.releaseDate,
+          b.totalTracks,
+          b.tracks ? JSON.stringify(b.tracks) : null,
           id,
         ],
       );
@@ -903,6 +1172,65 @@ export async function updatePost(
           id,
         ],
       );
+    } else if (currentType === "recommendation") {
+      await client.query(
+        `UPDATE recommendations SET subject_title = COALESCE($1, subject_title), recommendation_type = COALESCE($2, recommendation_type), description = COALESCE($3, description), cover_image_url = COALESCE($4, cover_image_url), cover_image_alt = COALESCE($5, cover_image_alt), rating = COALESCE($6, rating), external_url = COALESCE($7, external_url), recommended_by_user = COALESCE($8, recommended_by_user), compact = COALESCE($9, compact) WHERE id = $10`,
+        [
+          b.subject_title,
+          b.recommendation_type,
+          b.description,
+          b.cover_image_url,
+          b.cover_image_alt,
+          b.rating,
+          b.external_url,
+          b.recommended_by_user,
+          b.compact,
+          id,
+        ],
+      );
+    } else if (currentType === "rating") {
+      await client.query(
+        `UPDATE ratings SET subject_title = COALESCE($1, subject_title), item_type = COALESCE($2, item_type), cover_image_url = COALESCE($3, cover_image_url), cover_image_alt = COALESCE($4, cover_image_alt), rating = COALESCE($5, rating), liked = COALESCE($6, liked), comment = COALESCE($7, comment) WHERE id = $8`,
+        [
+          b.subject_title,
+          b.item_type,
+          b.cover_image_url,
+          b.cover_image_alt,
+          b.rating,
+          b.liked,
+          b.comment,
+          id,
+        ],
+      );
+    } else if (currentType === "ranking") {
+      await client.query(
+        `UPDATE rankings SET description = COALESCE($1, description), cover_image_url = COALESCE($2, cover_image_url), cover_image_alt = COALESCE($3, cover_image_alt) WHERE id = $4`,
+        [b.description, b.cover_image_url, b.cover_image_alt, id],
+      );
+      // Si se envían nuevos items, reemplazar los existentes
+      if (Array.isArray(b.items)) {
+        await client.query(`DELETE FROM ranking_items WHERE ranking_id = $1`, [
+          id,
+        ]);
+        for (let i = 0; i < b.items.length; i++) {
+          const item = b.items[i];
+          await client.query(
+            `INSERT INTO ranking_items (ranking_id, rank, subject_title, item_type, cover_image_url, cover_image_alt, rating, description, external_url, sort_order) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+            [
+              id,
+              item.rank,
+              item.subject_title,
+              item.item_type,
+              item.cover_image_url || null,
+              item.cover_image_alt || null,
+              item.rating || null,
+              item.description || null,
+              item.external_url || null,
+              item.sort_order ?? i,
+            ],
+          );
+        }
+      }
     }
 
     await client.query("COMMIT");
@@ -1055,6 +1383,57 @@ export async function attachImageToPost(data: {
       });
     }
 
+    if (type === "recommendation") {
+      const upd = await query(
+        "UPDATE recommendations SET cover_image_url = $1 WHERE id = $2 RETURNING id",
+        [publicUrl, id],
+      );
+      if (upd.rowCount === 0) {
+        await query(
+          "INSERT INTO recommendations (id, cover_image_url) VALUES ($1,$2)",
+          [id, publicUrl],
+        );
+      }
+      return createSuccessResult("Cover attached to recommendation", {
+        id,
+        url: publicUrl,
+      });
+    }
+
+    if (type === "rating") {
+      const upd = await query(
+        "UPDATE ratings SET cover_image_url = $1 WHERE id = $2 RETURNING id",
+        [publicUrl, id],
+      );
+      if (upd.rowCount === 0) {
+        await query(
+          "INSERT INTO ratings (id, cover_image_url) VALUES ($1,$2)",
+          [id, publicUrl],
+        );
+      }
+      return createSuccessResult("Cover attached to rating", {
+        id,
+        url: publicUrl,
+      });
+    }
+
+    if (type === "ranking") {
+      const upd = await query(
+        "UPDATE rankings SET cover_image_url = $1 WHERE id = $2 RETURNING id",
+        [publicUrl, id],
+      );
+      if (upd.rowCount === 0) {
+        await query(
+          "INSERT INTO rankings (id, cover_image_url) VALUES ($1,$2)",
+          [id, publicUrl],
+        );
+      }
+      return createSuccessResult("Cover attached to ranking", {
+        id,
+        url: publicUrl,
+      });
+    }
+
     if (type === "gallery") {
       // Ensure gallery row exists
       await query(
@@ -1190,5 +1569,89 @@ export async function attachImagesToPost(data: {
     );
   } finally {
     client.release();
+  }
+}
+
+// Create music post from Spotify URL
+export async function createMusicPostFromSpotify(data: {
+  url: string;
+  title?: string;
+  tags?: string[];
+  category?: string;
+  status?: "draft" | "published";
+  market?: string;
+}): Promise<ControllerResult> {
+  const vinicioDataUrl =
+    process.env.VINICIO_DATA_URL || "http://localhost:8888";
+
+  try {
+    // Call Vinicio_Data to parse Spotify URL
+    const response = await fetch(
+      `${vinicioDataUrl}/api/spotify/parse-music-post`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: data.url,
+          market: data.market || "MX",
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return createErrorResult(
+        "Failed to parse Spotify URL",
+        errorData.error || "Invalid Spotify URL or service unavailable",
+        response.status,
+      );
+    }
+
+    const musicData = await response.json();
+
+    // Create post with the parsed data
+    const createData = {
+      type: "music",
+      title: data.title || musicData.audio.title,
+      slug:
+        data.title?.toLowerCase().replace(/\s+/g, "-") ||
+        musicData.audio.title.toLowerCase().replace(/\s+/g, "-"),
+      status: data.status || "published",
+      tags: data.tags || [],
+      category: data.category,
+      featured: false,
+      published_at:
+        (data.status || "published") === "published"
+          ? new Date().toISOString()
+          : undefined,
+      // Music specific fields
+      audio_url: musicData.audio.url || undefined,
+      audio_title: musicData.audio.title || undefined,
+      artist: musicData.audio.artist || undefined,
+      album: musicData.audio.album || undefined,
+      genre: musicData.audio.genre || undefined,
+      duration: musicData.audio.duration || undefined,
+      cover_url: musicData.audio.coverUrl || undefined,
+      description: musicData.description || undefined,
+      music_type: musicData.musicType || undefined,
+      spotify_id: musicData.spotifyId || undefined,
+      spotify_url: musicData.spotifyUrl || undefined,
+      apple_music_url: musicData.appleMusicUrl || undefined,
+      youtube_url: musicData.youtubeUrl || undefined,
+      release_date: musicData.releaseDate || undefined,
+      total_tracks: musicData.totalTracks || undefined,
+      tracks: musicData.tracks || undefined,
+    } as UnifiedCreatePost;
+
+    return await createPost(createData);
+  } catch (error) {
+    logger.error({ err: error }, "Error in createMusicPostFromSpotify");
+    return createErrorResult(
+      "Failed to create music post from Spotify",
+      error instanceof Error ? error.message : String(error),
+      500,
+    );
   }
 }

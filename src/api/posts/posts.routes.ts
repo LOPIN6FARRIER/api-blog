@@ -3,6 +3,7 @@ import {
   getPostsHandler,
   getPostHandler,
   createPostHandler,
+  createMusicPostFromSpotifyHandler,
   updatePostHandler,
   deletePostHandler,
   uploadPostImageHandler,
@@ -14,17 +15,21 @@ const router = Router();
 // List / query posts
 router.get("/", getPostsHandler);
 
-// Single post by id or slug
-router.get("/:idOrSlug", getPostHandler);
-
 // Create
 router.post("/", createPostHandler);
+
+// Create music post from Spotify URL (MUST be before /:idOrSlug)
+router.post("/from-spotify", createMusicPostFromSpotifyHandler);
+
+// Single post by id or slug
+router.get("/:idOrSlug", getPostHandler);
 
 // Upload image for a post (field name: image)
 router.post("/:id/image", upload.single("image"), uploadPostImageHandler);
 
 // Upload multiple images for a post (field name: images[])
 import { uploadPostImagesHandler } from "./posts.handler.js";
+
 router.post("/:id/images", upload.array("images"), uploadPostImagesHandler);
 
 // Update

@@ -1,0 +1,289 @@
+{
+	"info": {
+		"name": "Create Projects",
+		"description": "Collection to create 13 projects in the blog API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Create Katax Core",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"slug\": \"katax-core\",\n  \"type\": \"project\",\n  \"title\": \"Katax Core\",\n  \"status\": \"published\",\n  \"featured\": true,\n  \"category\": \"library\",\n  \"tags\": [\"TypeScript\", \"Validation\", \"Open Source\", \"NPM\"],\n  \"published_at\": \"2025-12-27T01:02:52.276Z\",\n  \"payload\": {\n    \"description\": \"A lightweight and extensible schema validation library for TypeScript and JavaScript with full type safety. Type-safe runtime validation with full TypeScript inference. Supports synchronous and asynchronous validation, chaining API, multiple error reporting, data transforms, and comprehensive schemas including String, Number, Object, Array, Date, Email, Base64, and File. Works in both browser and Node.js environments with minimal dependencies.\",\n    \"technologies\": [\"TypeScript\", \"Node.js\", \"date-fns\"],\n    \"status\": \"completed\",\n    \"live_url\": \"https://www.katax.dev/\",\n    \"repo_url\": \"https://github.com/LOPIN6FARRIER/katax-core\",\n    \"cover_image_url\": \"https://res.cloudinary.com/dniyqu7yq/image/upload/v1766797373/portafolio/projects/b8894d7f-0c7f-4890-ad52-46e71373e2ff/main.jpg\",\n    \"cover_image_alt\": \"Katax Core - Schema Validation Library\"\n  }\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/posts",
+					"host": ["{{base_url}}"],
+					"path": ["api", "posts"]
+				}
+			}
+		},
+		{
+			"name": "2. Create vinicio-validator",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"slug\": \"vinicio-validator\",\n  \"type\": \"project\",\n  \"title\": \"vinicio-validator\",\n  \"status\": \"published\",\n  \"featured\": false,\n  \"category\": \"library\",\n  \"tags\": [\"Java\", \"Validation\", \"Maven\"],\n  \"published_at\": \"2025-12-27T03:31:25.719Z\",\n  \"payload\": {\n    \"description\": \"A fluent validation library for Java inspired by Zod and Joi, designed to validate data in a simple, expressive, and extensible way. Provides a fluent API for validating Java data structures with strong typing and generic validation. It supports validation for numbers, strings, booleans, dates, arrays, and object schemas. The library allows defining constraints such as ranges, formats, and regex rules, supports LocalDate and String date validation, and throws ValidationException for error handling.\",\n    \"technologies\": [\"Java\", \"Maven\"],\n    \"status\": \"completed\",\n    \"repo_url\": \"https://github.com/LOPIN6FARRIER/java-validator\",\n    \"cover_image_url\": \"https://res.cloudinary.com/dniyqu7yq/image/upload/v1766807711/portafolio/projects/025a7c16-ed6e-4a59-9eff-9e2d9a3f8a9d/main.png\",\n    \"cover_image_alt\": \"Vinicio Validator - Java Validation Library\"\n  }\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/posts",
+					"host": ["{{base_url}}"],
+					"path": ["api", "posts"]
+				}
+			}
+		},
+		{
+			"name": "3. Create WordWaaves",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"slug\": \"wordwaaves\",\n  \"type\": \"project\",\n  \"title\": \"WordWaaves\",\n  \"status\": \"published\",\n  \"featured\": true,\n  \"category\": \"web-app\",\n  \"tags\": [\"HTML\", \"CSS\", \"JavaScript\", \"Typing Practice\"],\n  \"published_at\": \"2025-12-21T18:37:50.207Z\",\n  \"payload\": {\n    \"description\": \"Desarrolle una aplicacion basada en Monkey Type con HTML, JavaScript y CSS que nos permite practicar nuestra habilidad escribiendo asi como aprender otro idioma al mismo tiempo incluye las variables de tiempo y modo libre. WordWaaves amplia la idea del clon de Monkey Type integrando un selector de modo de juego. Los usuarios pueden elegir entre Contra Reloj, donde seleccionan la duracion y el numero de palabras, o Free, que elimina la limitacion de tiempo y permite practicar sin presion.\",\n    \"technologies\": [\"HTML\", \"CSS\", \"JavaScript\"],\n    \"status\": \"completed\",\n    \"live_url\": \"https://wordweave.vinicioesparza.dev/\",\n    \"repo_url\": \"https://github.com/LOPIN6FARRIER/WordWeaves\",\n    \"cover_image_url\": \"/media/monkey-type-clone.png\",\n    \"cover_image_alt\": \"WordWaaves - Typing Practice App\"\n  }\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/posts",
+					"host": ["{{base_url}}"],
+					"path": ["api", "posts"]
+				}
+			}
+		},
+		{
+			"name": "4. Create Colors Palette",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"slug\": \"colors-palette\",\n  \"type\": \"project\",\n  \"title\": \"Colors Palette\",\n  \"status\": \"published\",\n  \"featured\": true,\n  \"category\": \"web-app\",\n  \"tags\": [\"HTML\", \"CSS\", \"JavaScript\", \"Design Tools\"],\n  \"published_at\": \"2025-12-21T18:39:19.003Z\",\n  \"payload\": {\n    \"description\": \"Una aplicación web que nos permite explorar paletas de colores de acuerdo al tema seleccionado. Este proyecto es una herramienta para diseñadores y desarrolladores web que permite explorar diferentes paletas de colores según el tema seleccionado. Los usuarios pueden elegir entre una variedad de paletas predefinidas o personalizar las suyas propias. La aplicación también permite copiar el código hexadecimal de cada color para facilitar su integración en proyectos.\",\n    \"technologies\": [\"HTML\", \"CSS\", \"JavaScript\"],\n    \"status\": \"completed\",\n    \"live_url\": \"https://colors-palette.vinicioesparza.dev/\",\n    \"repo_url\": \"https://github.com/LOPIN6FARRIER/colors-palette\",\n    \"cover_image_url\": \"/media/PaletteColors.png\",\n    \"cover_image_alt\": \"Colors Palette - Color Exploration Tool\"\n  }\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/posts",
+					"host": ["{{base_url}}"],
+					"path": ["api", "posts"]
+				}
+			}
+		},
+		{
+			"name": "5. Create SWAN Website",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"slug\": \"swan-2024\",\n  \"type\": \"project\",\n  \"title\": \"SOUTHWESTERN ASSOCIATION OF NATURALISTS (SWAN)\",\n  \"status\": \"published\",\n  \"featured\": true,\n  \"category\": \"professional\",\n  \"tags\": [\"WordPress\", \"Bootstrap\", \"Event Management\"],\n  \"published_at\": \"2025-12-21T18:13:10.487Z\",\n  \"payload\": {\n    \"description\": \"Diseñé y desarrollé la página web oficial para la 71ª Reunión Anual de la Southwestern Association of Naturalists (SWAN), realizada en Aguascalientes, México, del 10 al 13 de abril de 2024. La web ofreció a los asistentes información, registro, reservas de alojamiento, programa de actividades y conexión con otros participantes. Este proyecto consistió en la creación de una plataforma web completamente funcional que brindó a los asistentes una experiencia fácil de usar para registrarse en el evento, reservar alojamiento y consultar el programa de actividades.\",\n    \"technologies\": [\"WordPress\", \"Bootstrap\", \"PHP\", \"MySQL\"],\n    \"status\": \"completed\",\n    \"live_url\": \"https://swan.uaa.mx/\",\n    \"cover_image_url\": \"/media/swan.webp\",\n    \"cover_image_alt\": \"SWAN 2024 Conference Website\"\n  }\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/posts",
+					"host": ["{{base_url}}"],
+					"path": ["api", "posts"]
+				}
+			}
+		},
+		{
+			"name": "6. Create Monkey Type Clone",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"slug\": \"monkey-type-clone\",\n  \"type\": \"project\",\n  \"title\": \"Monkey Type Clone\",\n  \"status\": \"published\",\n  \"featured\": false,\n  \"category\": \"web-app\",\n  \"tags\": [\"HTML\", \"CSS\", \"JavaScript\", \"Typing\"],\n  \"published_at\": \"2025-12-21T18:37:50.207Z\",\n  \"payload\": {\n    \"description\": \"Desarrolle una aplicacion basada en Monkey Type con HTML, JavaScript y CSS que nos permite practicar nuestra habilidad escribiendo. Se trata de un clon simplificado de Monkey Type construido con HTML, JavaScript y CSS. La aplicacion permite seleccionar la duracion de la prueba mediante un menu desplegable con opciones de 32 a 512 segundos, asi como la cantidad de palabras a practicar.\",\n    \"technologies\": [\"HTML\", \"CSS\", \"JavaScript\"],\n    \"status\": \"completed\",\n    \"live_url\": \"https://type-clone.vinicioesparza.dev/\",\n    \"repo_url\": \"https://github.com/LOPIN6FARRIER/monkey-type\",\n    \"cover_image_url\": \"/media/monkey-type-clone.png\",\n    \"cover_image_alt\": \"Monkey Type Clone\"\n  }\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/posts",
+					"host": ["{{base_url}}"],
+					"path": ["api", "posts"]
+				}
+			}
+		},
+		{
+			"name": "7. Create Spotify Clone",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"slug\": \"spotify-clone\",\n  \"type\": \"project\",\n  \"title\": \"Spotify Clone\",\n  \"status\": \"published\",\n  \"featured\": true,\n  \"category\": \"web-app\",\n  \"tags\": [\"Astro\", \"React\", \"Tailwind CSS\", \"TypeScript\", \"Svelte\"],\n  \"published_at\": \"2025-12-21T18:13:10.487Z\",\n  \"payload\": {\n    \"description\": \"He desarrollado un clon funcional de Spotify utilizando datos locales, con el potencial de integrar una API de musica, funciones de login, creacion de playlist, etc. Este proyecto replica la experiencia de Spotify mediante una aplicacion web construida con Astro, React y Tailwind CSS. La interfaz incluye navegacion lateral con Inicio, Buscar y Tu Biblioteca, donde se muestran distintas listas de reproduccion.\",\n    \"technologies\": [\"Astro\", \"React\", \"Tailwind CSS\", \"TypeScript\", \"Svelte\"],\n    \"status\": \"completed\",\n    \"live_url\": \"https://spotify-clone-vinicioesparza-dev.netlify.app/\",\n    \"repo_url\": \"https://github.com/LOPIN6FARRIER/spotify-clone.git\",\n    \"cover_image_url\": \"/media/spotify-clone.png\",\n    \"cover_image_alt\": \"Spotify Clone Interface\"\n  }\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/posts",
+					"host": ["{{base_url}}"],
+					"path": ["api", "posts"]
+				}
+			}
+		},
+		{
+			"name": "8. Create Chat With PDF",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"slug\": \"chat-with-pdf\",\n  \"type\": \"project\",\n  \"title\": \"Chat With Pdf\",\n  \"status\": \"published\",\n  \"featured\": false,\n  \"category\": \"ai\",\n  \"tags\": [\"Astro\", \"Tailwind CSS\", \"TypeScript\", \"Svelte\", \"OpenAI\", \"Cloudinary\", \"Flowbite\"],\n  \"published_at\": \"2025-12-21T18:39:19.003Z\",\n  \"payload\": {\n    \"description\": \"Desarrollé un sistema de chat inteligente que permite a los usuarios cargar archivos PDF y extraer automáticamente su texto utilizando la tecnología OCR. Integré la API de Cloudinary para el procesamiento de imágenes y almacenamiento en la nube. Utilizando el texto extraído, implementé un chatbot basado en la API de ChatGPT, que responde a las consultas de los usuarios y ofrece información contextualizada sobre el contenido del documento PDF.\",\n    \"technologies\": [\"Astro\", \"Tailwind CSS\", \"TypeScript\", \"Svelte\", \"OpenAI API\", \"Cloudinary\", \"Flowbite\"],\n    \"status\": \"completed\",\n    \"repo_url\": \"https://github.com/LOPIN6FARRIER/chat-with-pdf.git\",\n    \"cover_image_url\": \"/media/chat-with-pdf.png\",\n    \"cover_image_alt\": \"Chat With PDF Interface\"\n  }\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/posts",
+					"host": ["{{base_url}}"],
+					"path": ["api", "posts"]
+				}
+			}
+		},
+		{
+			"name": "9. Create Google Translator Clone",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"slug\": \"google-translator-clone\",\n  \"type\": \"project\",\n  \"title\": \"Clone de Google Traductor\",\n  \"status\": \"published\",\n  \"featured\": false,\n  \"category\": \"ai\",\n  \"tags\": [\"React\", \"TypeScript\", \"CSS\", \"OpenAI\", \"Vite\", \"Vitest\"],\n  \"published_at\": \"2025-12-21T18:39:19.003Z\",\n  \"payload\": {\n    \"description\": \"He desarrollado un clon funcional de Google Traductor utilizando la API de OpenAi, y las apis de navegador para copiar y leer texto. Este proyecto replica la funcionalidad básica de Google Traductor utilizando la API de OpenAI para la traducción de textos. Implementé tecnologías como React y TypeScript para la creación de la interfaz de usuario, y la API de navegador para ofrecer opciones de copiar y leer el texto traducido.\",\n    \"technologies\": [\"React\", \"TypeScript\", \"CSS\", \"OpenAI API\", \"Vite\", \"Vitest\"],\n    \"status\": \"completed\",\n    \"cover_image_url\": \"/media/translator.png\",\n    \"cover_image_alt\": \"Google Translator Clone\"\n  }\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/posts",
+					"host": ["{{base_url}}"],
+					"path": ["api", "posts"]
+				}
+			}
+		},
+		{
+			"name": "10. Create Beautiful Backgrounds",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"slug\": \"beautiful-backgrounds-tailwind\",\n  \"type\": \"project\",\n  \"title\": \"Beautiful and moderns backgrounds for tailwind\",\n  \"status\": \"published\",\n  \"featured\": false,\n  \"category\": \"design\",\n  \"tags\": [\"Astro\", \"Tailwind CSS\"],\n  \"published_at\": \"2025-12-21T18:37:50.207Z\",\n  \"payload\": {\n    \"description\": \"Descubre una coleccion de fondos cuidadosamente seleccionados para dar vida a tus proyectos con Tailwind CSS. Sumergite en una variedad de estilos y paletas de colores que te inspiraran en tu proximo diseno. Este proyecto ofrece una gran coleccion de fondos modernos optimizados para integrarse con Tailwind CSS. Los fondos se presentan como tarjetas numeradas y abarcan una amplia gama de estilos: degradados suaves, tonos oscuros, patrones geometricos y texturas con cuadros o puntos.\",\n    \"technologies\": [\"Astro\", \"Tailwind CSS\"],\n    \"status\": \"completed\",\n    \"live_url\": \"https://breezybackdrops.vinicioesparza.dev/\",\n    \"repo_url\": \"https://github.com/LOPIN6FARRIER/bg-beautyCollection\",\n    \"cover_image_url\": \"/media/bg-beauty.png\",\n    \"cover_image_alt\": \"Beautiful Backgrounds Collection\"\n  }\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/posts",
+					"host": ["{{base_url}}"],
+					"path": ["api", "posts"]
+				}
+			}
+		},
+		{
+			"name": "11. Create Calculadora Multifuncional",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"slug\": \"calculadora-multifuncional\",\n  \"type\": \"project\",\n  \"title\": \"Calculadora Multifuncional\",\n  \"status\": \"published\",\n  \"featured\": false,\n  \"category\": \"mobile\",\n  \"tags\": [\"Kotlin\", \"Android\"],\n  \"published_at\": \"2025-12-21T18:39:19.003Z\",\n  \"payload\": {\n    \"description\": \"Desarrollé una calculadora multifuncional en Kotlin con un diseño minimalista y funcionalidades completas. La interfaz presenta un código de colores intuitivo para una rápida identificación de las funciones. La calculadora va más allá de las funciones matemáticas básicas, incorporando conversiones entre diferentes sistemas numéricos (hexadecimal, decimal, octal) y unidades de medida (longitud, temperatura, etc.).\",\n    \"technologies\": [\"Kotlin\", \"Android\"],\n    \"status\": \"completed\",\n    \"live_url\": \"https://calculadora-multi.vinicioesparza.dev/\",\n    \"cover_image_url\": \"/media/calculadora.png\",\n    \"cover_image_alt\": \"Calculadora Multifuncional\"\n  }\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/posts",
+					"host": ["{{base_url}}"],
+					"path": ["api", "posts"]
+				}
+			}
+		},
+		{
+			"name": "12. Create Sistema Integral",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"slug\": \"sistema-integral-almacen\",\n  \"type\": \"project\",\n  \"title\": \"Sistema Integral\",\n  \"status\": \"published\",\n  \"featured\": false,\n  \"category\": \"desktop\",\n  \"tags\": [\"C#\", \"MySQL\", \"Visual Studio\", \"Desktop\"],\n  \"published_at\": \"2025-12-21T18:39:19.003Z\",\n  \"payload\": {\n    \"description\": \"Desarrollé e implementé un sistema integral que unifica la administración de almacenes, ventas y compras, adaptándose a la imagen de la empresa y su base de datos existente. Este proyecto consistió en la creación de un sistema de gestión empresarial integrado que permite la administración eficiente de tres áreas clave: almacenes, ventas y compras. El sistema está adaptado a la estructura de la empresa y su base de datos, garantizando que la información se gestione de manera coherente y precisa.\",\n    \"technologies\": [\"C#\", \"MySQL\", \"Visual Studio\", \"WinForms\"],\n    \"status\": \"completed\",\n    \"cover_image_url\": \"/media/sistema.webp\",\n    \"cover_image_alt\": \"Sistema Integral de Gestión\"\n  }\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/posts",
+					"host": ["{{base_url}}"],
+					"path": ["api", "posts"]
+				}
+			}
+		},
+		{
+			"name": "13. Create Mi Rutina",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"slug\": \"mi-rutina\",\n  \"type\": \"project\",\n  \"title\": \"Mi Rutina\",\n  \"status\": \"published\",\n  \"featured\": false,\n  \"category\": \"mobile\",\n  \"tags\": [\"Kotlin\", \"Android\", \"Firebase\"],\n  \"published_at\": \"2025-12-21T18:39:19.003Z\",\n  \"payload\": {\n    \"description\": \"Desarrollé una aplicación para Android en Kotlin que utiliza Firebase para permitir a los usuarios crear, borrar y acceder a sus cuentas. La aplicación ofrece la posibilidad de ver una lista de ejercicios con sus respectivas instrucciones, así como rutinas predeterminadas. Además, los usuarios pueden crear sus propias rutinas personalizadas. Este proyecto consiste en una aplicación móvil desarrollada en Kotlin para Android, utilizando Firebase como plataforma de backend.\",\n    \"technologies\": [\"Kotlin\", \"Android\", \"Firebase\", \"Android Studio\"],\n    \"status\": \"completed\",\n    \"cover_image_url\": \"/media/MiRutina.jpg\",\n    \"cover_image_alt\": \"Mi Rutina - Fitness App\"\n  }\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/posts",
+					"host": ["{{base_url}}"],
+					"path": ["api", "posts"]
+				}
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	]
+}

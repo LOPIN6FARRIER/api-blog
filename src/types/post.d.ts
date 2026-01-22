@@ -3,24 +3,27 @@
 // ============================================
 
 export type PostType =
-  | 'article'      // Artículos largos, tutoriales, blog posts
-  | 'photo'        // Fotografías individuales o destacadas
-  | 'gallery'      // Colección de fotos
-  | 'thought'      // Pensamientos cortos, citas, reflexiones
-  | 'music'        // Tracks, playlists, álbumes
-  | 'video'        // Videos embebidos o propios
-  | 'project'      // Proyectos de portfolio
-  | 'link'         // Enlaces externos con preview
-  | 'announcement' // Anuncios importantes
-  | 'event';       // Eventos con fecha
+  | "article" // Artículos largos, tutoriales, blog posts
+  | "photo" // Fotografías individuales o destacadas
+  | "gallery" // Colección de fotos
+  | "thought" // Pensamientos cortos, citas, reflexiones
+  | "music" // Tracks, playlists, álbumes
+  | "video" // Videos embebidos o propios
+  | "project" // Proyectos de portfolio
+  | "link" // Enlaces externos con preview
+  | "announcement" // Anuncios importantes
+  | "event" // Eventos con fecha
+  | "recommendation" // Recomendaciones de series, películas, libros, etc.
+  | "ranking" // Listas o rankings de ítems
+  | "rating"; // Valoraciones individuales de ítems
 
-export type PostStatus = 'draft' | 'published' | 'archived';
-export type ThoughtStyle = 'quote' | 'note' | 'idea';
-export type ThoughtMood = 'reflective' | 'inspired' | 'curious' | 'grateful';
-export type ProjectStatus = 'in-progress' | 'completed' | 'archived';
-export type AnnouncementPriority = 'low' | 'normal' | 'high' | 'urgent';
-export type VideoProvider = 'youtube' | 'vimeo' | 'self';
-export type GalleryLayout = 'grid' | 'masonry' | 'carousel';
+export type PostStatus = "draft" | "published" | "archived";
+export type ThoughtStyle = "quote" | "note" | "idea";
+export type ThoughtMood = "reflective" | "inspired" | "curious" | "grateful";
+export type ProjectStatus = "in-progress" | "completed" | "archived";
+export type AnnouncementPriority = "low" | "normal" | "high" | "urgent";
+export type VideoProvider = "youtube" | "vimeo" | "self";
+export type GalleryLayout = "grid" | "masonry" | "carousel";
 
 // ============================================
 // BASE INTERFACES
@@ -85,7 +88,7 @@ export interface VideoMedia {
  * ArticlePost - Para blogs, tutoriales, artículos largos
  */
 export interface ArticlePost extends PostBase {
-  type: 'article';
+  type: "article";
   excerpt: string;
   content: string;
   coverImage?: ImageMedia;
@@ -97,7 +100,7 @@ export interface ArticlePost extends PostBase {
  * PhotoPost - Fotografía individual destacada
  */
 export interface PhotoPost extends PostBase {
-  type: 'photo';
+  type: "photo";
   image: ImageMedia;
   description?: string;
   camera?: string;
@@ -110,7 +113,7 @@ export interface PhotoPost extends PostBase {
  * GalleryPost - Colección de fotografías
  */
 export interface GalleryPost extends PostBase {
-  type: 'gallery';
+  type: "gallery";
   description?: string;
   images: ImageMedia[];
   layout?: GalleryLayout;
@@ -121,7 +124,7 @@ export interface GalleryPost extends PostBase {
  * ThoughtPost - Pensamientos cortos, citas, reflexiones
  */
 export interface ThoughtPost extends PostBase {
-  type: 'thought';
+  type: "thought";
   content: string;
   source?: string;
   mood?: ThoughtMood;
@@ -132,20 +135,34 @@ export interface ThoughtPost extends PostBase {
  * MusicPost - Tracks, playlists, álbumes
  */
 export interface MusicPost extends PostBase {
-  type: 'music';
+  type: "music";
   audio: AudioMedia;
   description?: string;
   lyrics?: string;
   spotifyUrl?: string;
   appleMusicUrl?: string;
   youtubeUrl?: string;
+  // Album support
+  musicType?: "track" | "album";
+  spotifyId?: string;
+  releaseDate?: string;
+  totalTracks?: number;
+  tracks?: Array<{
+    id: string;
+    name: string;
+    trackNumber: number;
+    duration: string;
+    artists: string[];
+    previewUrl: string | null;
+    explicit: boolean;
+  }>;
 }
 
 /**
  * VideoPost - Videos propios o embebidos
  */
 export interface VideoPost extends PostBase {
-  type: 'video';
+  type: "video";
   video: VideoMedia;
   description?: string;
   transcript?: string;
@@ -155,7 +172,7 @@ export interface VideoPost extends PostBase {
  * ProjectPost - Proyectos de portfolio
  */
 export interface ProjectPost extends PostBase {
-  type: 'project';
+  type: "project";
   description: string;
   content?: string;
   coverImage?: ImageMedia;
@@ -173,7 +190,7 @@ export interface ProjectPost extends PostBase {
  * LinkPost - Enlaces externos con preview
  */
 export interface LinkPost extends PostBase {
-  type: 'link';
+  type: "link";
   url: string;
   description?: string;
   siteName?: string;
@@ -185,7 +202,7 @@ export interface LinkPost extends PostBase {
  * AnnouncementPost - Anuncios importantes
  */
 export interface AnnouncementPost extends PostBase {
-  type: 'announcement';
+  type: "announcement";
   content: string;
   priority?: AnnouncementPriority;
   expiresAt?: string;
@@ -197,7 +214,7 @@ export interface AnnouncementPost extends PostBase {
  * EventPost - Eventos con fecha
  */
 export interface EventPost extends PostBase {
-  type: 'event';
+  type: "event";
   description: string;
   content?: string;
   coverImage?: ImageMedia;
@@ -216,6 +233,64 @@ export interface EventPost extends PostBase {
 }
 
 // ============================================
+// RANKING ITEM TYPE
+// ============================================
+
+export type ItemType = "serie" | "película" | "libro" | "podcast" | "otro";
+
+export type RankingItem = {
+  rank: number;
+  subjectTitle: string;
+  itemType: ItemType;
+  coverImage?: ImageMedia;
+  rating?: number;
+  description?: string;
+  externalUrl?: string;
+};
+
+// ============================================
+// RANKING/LIST POST (RankingPost)
+// ============================================
+
+export interface RankingPost extends PostBase {
+  type: "ranking";
+  title: string;
+  items: RankingItem[];
+  description?: string;
+  coverImage?: ImageMedia;
+}
+
+// ============================================
+// RATING POST (RatingPost)
+// ============================================
+
+export interface RatingPost extends PostBase {
+  type: "rating";
+  subjectTitle: string;
+  itemType: ItemType;
+  coverImage?: ImageMedia;
+  rating: number;
+  liked?: boolean;
+  comment?: string;
+}
+
+// ============================================
+// RECOMMENDATION POST (RecommendationPost)
+// ============================================
+
+export interface RecommendationPost extends PostBase {
+  type: "recommendation";
+  subjectTitle: string;
+  recommendationType: ItemType;
+  description?: string;
+  coverImage?: ImageMedia;
+  rating?: number;
+  externalUrl?: string;
+  recommendedByUser?: boolean;
+  compact?: boolean;
+}
+
+// ============================================
 // UNION TYPE
 // ============================================
 
@@ -229,7 +304,10 @@ export type Post =
   | ProjectPost
   | LinkPost
   | AnnouncementPost
-  | EventPost;
+  | EventPost
+  | RankingPost
+  | RatingPost
+  | RecommendationPost;
 
 // ============================================
 // FEED ITEM (para renderizado en MasonryFeed)
@@ -237,6 +315,6 @@ export type Post =
 
 export interface FeedItem {
   post: Post;
-  size?: 'small' | 'medium' | 'large' | 'full';
+  size?: "small" | "medium" | "large" | "full";
   priority?: number;
 }

@@ -4,6 +4,7 @@ import {
   attachImagesToPost,
   attachImageToPost,
   createPost,
+  createMusicPostFromSpotify,
   deletePost,
   getPost,
   getPosts,
@@ -179,5 +180,38 @@ export async function uploadPostImagesHandler(
       return { isValid: true, data: { id: idCheck.data!.id, items } } as any;
     },
     (validData: any) => attachImagesToPost(validData),
+  );
+}
+
+export async function createMusicPostFromSpotifyHandler(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  await sendResponse(
+    req,
+    res,
+    () => {
+      const { url, title, tags, category, status, market } = req.body;
+
+      if (!url || typeof url !== "string") {
+        return {
+          isValid: false,
+          errors: [{ field: "url", message: "Spotify URL is required" }],
+        } as any;
+      }
+
+      return {
+        isValid: true,
+        data: {
+          url,
+          title,
+          tags: Array.isArray(tags) ? tags : undefined,
+          category,
+          status: "published",
+          market,
+        },
+      } as any;
+    },
+    (valid) => createMusicPostFromSpotify(valid),
   );
 }

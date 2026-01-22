@@ -28,7 +28,10 @@ CREATE TYPE post_type AS ENUM (
   'project',
   'link',
   'announcement',
-  'event'
+  'event',
+  'recommendation',
+  'ranking',
+  'rating'
 );
 
 CREATE TYPE post_status AS ENUM (
@@ -232,6 +235,89 @@ CREATE TABLE events (
 );
 
 -- ============================================
+-- RECOMMENDATION/RATING/RANKING TYPES
+-- ============================================
+
+CREATE TYPE item_type AS ENUM (
+  'serie',
+  'película',
+  'libro',
+  'podcast',
+  'otro'
+);
+
+-- ============================================
+-- RECOMMENDATIONS
+-- ============================================
+
+CREATE TABLE recommendations (
+  id UUID PRIMARY KEY REFERENCES posts(id) ON DELETE CASCADE,
+  subject_title VARCHAR(500) NOT NULL,
+  recommendation_type item_type NOT NULL,
+  description TEXT,
+  cover_image_url VARCHAR(500),
+  cover_image_alt VARCHAR(255),
+  rating DECIMAL(3,1), -- 0.0 to 10.0
+  external_url VARCHAR(500),
+  recommended_by_user BOOLEAN DEFAULT TRUE,
+  compact BOOLEAN DEFAULT FALSE
+);
+
+CREATE INDEX idx_recommendations_type ON recommendations(recommendation_type);
+CREATE INDEX idx_recommendations_rating ON recommendations(rating);
+
+-- ============================================
+-- RATINGS
+-- ============================================
+
+CREATE TABLE ratings (
+  id UUID PRIMARY KEY REFERENCES posts(id) ON DELETE CASCADE,
+  subject_title VARCHAR(500) NOT NULL,
+  item_type item_type NOT NULL,
+  cover_image_url VARCHAR(500),
+  cover_image_alt VARCHAR(255),
+  rating DECIMAL(3,1) NOT NULL, -- 0.0 to 10.0
+  liked BOOLEAN DEFAULT FALSE,
+  comment TEXT
+);
+
+CREATE INDEX idx_ratings_type ON ratings(item_type);
+CREATE INDEX idx_ratings_rating ON ratings(rating);
+CREATE INDEX idx_ratings_liked ON ratings(liked);
+
+-- ============================================
+-- RANKINGS
+-- ============================================
+
+CREATE TABLE rankings (
+  id UUID PRIMARY KEY REFERENCES posts(id) ON DELETE CASCADE,
+  description TEXT,
+  cover_image_url VARCHAR(500),
+  cover_image_alt VARCHAR(255)
+);
+
+-- ============================================
+-- RANKING ITEMS (1:N relationship)
+-- ============================================
+
+CREATE TABLE ranking_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  ranking_id UUID REFERENCES rankings(id) ON DELETE CASCADE,
+  rank INTEGER NOT NULL,
+  subject_title VARCHAR(500) NOT NULL,
+  item_type item_type NOT NULL,
+  cover_image_url VARCHAR(500),
+  cover_image_alt VARCHAR(255),
+  rating DECIMAL(3,1),
+  description TEXT,
+  external_url VARCHAR(500),
+  sort_order INTEGER DEFAULT 0
+);
+
+CREATE INDEX idx_ranking_items_ranking ON ranking_items(ranking_id);
+CREATE INDEX idx_ranking_items_rank ON ranking_items(rank);
+
+-- ============================================
 -- FUNCIÓN PARA ACTUALIZAR updated_at
 -- ============================================
 
@@ -339,7 +425,29 @@ SELECT
   e.virtual_url,
   e.registration_url,
   e.price,
-  e.capacity
+  e.capacity,
+  -- Recommendation fields
+  rec.subject_title AS recommendation_subject,
+  rec.recommendation_type,
+  rec.description AS recommendation_description,
+  rec.cover_image_url AS recommendation_cover_url,
+  rec.cover_image_alt AS recommendation_cover_alt,
+  rec.rating AS recommendation_rating,
+  rec.external_url AS recommendation_external_url,
+  rec.recommended_by_user,
+  rec.compact AS recommendation_compact,
+  -- Rating fields
+  rat.subject_title AS rating_subject,
+  rat.item_type AS rating_item_type,
+  rat.cover_image_url AS rating_cover_url,
+  rat.cover_image_alt AS rating_cover_alt,
+  rat.rating AS rating_value,
+  rat.liked AS rating_liked,
+  rat.comment AS rating_comment,
+  -- Ranking fields
+  rank.description AS ranking_description,
+  rank.cover_image_url AS ranking_cover_url,
+  rank.cover_image_alt AS ranking_cover_alt
 FROM posts p
 LEFT JOIN articles a ON p.id = a.id AND p.type = 'article'
 LEFT JOIN photos ph ON p.id = ph.id AND p.type = 'photo'
@@ -351,9 +459,12 @@ LEFT JOIN projects pr ON p.id = pr.id AND p.type = 'project'
 LEFT JOIN links l ON p.id = l.id AND p.type = 'link'
 LEFT JOIN announcements an ON p.id = an.id AND p.type = 'announcement'
 LEFT JOIN events e ON p.id = e.id AND p.type = 'event'
+LEFT JOIN recommendations rec ON p.id = rec.id AND p.type = 'recommendation'
+LEFT JOIN ratings rat ON p.id = rat.id AND p.type = 'rating'
+LEFT JOIN rankings rank ON p.id = rank.id AND p.type = 'ranking'
 ORDER BY p.created_at DESC;
 
--- NOTA IMPORTANTE: Las gallery_images NO están en la vista porque
--- son una relación 1:N. El API las obtiene en una consulta separada
--- y las combina con el resultado del post tipo 'gallery'.
+-- NOTA IMPORTANTE: Las gallery_images y ranking_items NO están en la vista porque
+-- son relaciones 1:N. El API las obtiene en una consulta separada
+-- y las combina con el resultado del post tipo 'gallery' o 'ranking'.
 

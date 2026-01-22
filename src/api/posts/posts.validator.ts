@@ -32,7 +32,7 @@ export const basePostSchema = k.object({
   slug: k.string().minLength(3),
   type: k.string().minLength(3),
   title: k.string().minLength(1),
-  status: k.string().optional(),
+  status: k.string().optional().default("published"),
   featured: k.boolean().optional(),
   category: k.string().optional(),
   tags: k.array(k.string()).optional(),
@@ -114,19 +114,52 @@ const musicSchema = basePostSchema.extend({
   audio: k
     .object({
       url: k.string(),
-      title: k.string(),
-      artist: k.string(),
+      title: k.string().optional(),
+      artist: k.string().optional(),
       album: k.string().optional(),
       genre: k.string().optional(),
-      duration: k.string(),
+      duration: k.string().optional(),
       coverUrl: k.string().optional(),
     })
     .optional(),
+  // Database field names (snake_case)
+  audio_url: k.string().optional(),
+  audio_title: k.string().optional(),
+  artist: k.string().optional(),
+  album: k.string().optional(),
+  genre: k.string().optional(),
+  duration: k.string().optional(),
+  cover_url: k.string().optional(),
   description: k.string().optional(),
-  lyrics: k.string().optional(),
+  music_type: k.string().optional(),
+  spotify_id: k.string().optional(),
+  spotify_url: k.string().optional(),
+  apple_music_url: k.string().optional(),
+  youtube_url: k.string().optional(),
+  release_date: k.string().optional(),
+  total_tracks: k.number().optional(),
+  // TypeScript field names (camelCase) - also supported
+  musicType: k.string().optional(),
+  spotifyId: k.string().optional(),
   spotifyUrl: k.string().optional(),
   appleMusicUrl: k.string().optional(),
   youtubeUrl: k.string().optional(),
+  releaseDate: k.string().optional(),
+  totalTracks: k.number().optional(),
+  tracks: k
+    .array(
+      k.object({
+        id: k.string().optional(),
+        name: k.string().optional(),
+        title: k.string().optional(),
+        trackNumber: k.number().optional(),
+        duration: k.string().optional(),
+        artists: k.string().optional(),
+        previewUrl: k.string().optional(),
+        explicit: k.boolean().optional(),
+      }),
+    )
+    .optional(),
 });
 
 const projectSchema = basePostSchema.extend({
@@ -137,6 +170,11 @@ const projectSchema = basePostSchema.extend({
   technologies: k.array(k.string()).optional(),
   live_url: k.string().optional(),
   repo_url: k.string().optional(),
+  project_status: k
+    .string()
+    .oneOf(["in_progress", "completed", "archived"])
+    .optional()
+    .default("in_progress"),
 });
 
 const linkSchema = basePostSchema.extend({
@@ -186,6 +224,50 @@ const eventSchema = basePostSchema.extend({
   capacity: k.number().optional(),
 });
 
+const rankingItemSchema = k.object({
+  rank: k.number(),
+  subject_title: k.string(),
+  item_type: k.string(),
+  cover_image_url: k.string().optional(),
+  cover_image_alt: k.string().optional(),
+  rating: k.number().optional(),
+  description: k.string().optional(),
+  external_url: k.string().optional(),
+  sort_order: k.number().optional(),
+});
+
+const recommendationSchema = basePostSchema.extend({
+  type: k.literal("recommendation"),
+  subject_title: k.string().optional(),
+  recommendation_type: k.string().optional(),
+  description: k.string().optional(),
+  cover_image_url: k.string().optional(),
+  cover_image_alt: k.string().optional(),
+  rating: k.number().optional(),
+  external_url: k.string().optional(),
+  recommended_by_user: k.boolean().optional(),
+  compact: k.boolean().optional(),
+});
+
+const ratingSchema = basePostSchema.extend({
+  type: k.literal("rating"),
+  subject_title: k.string().optional(),
+  item_type: k.string().optional(),
+  cover_image_url: k.string().optional(),
+  cover_image_alt: k.string().optional(),
+  rating: k.number().optional(),
+  liked: k.boolean().optional(),
+  comment: k.string().optional(),
+});
+
+const rankingSchema = basePostSchema.extend({
+  type: k.literal("ranking"),
+  description: k.string().optional(),
+  cover_image_url: k.string().optional(),
+  cover_image_alt: k.string().optional(),
+  items: k.array(rankingItemSchema).optional(),
+});
+
 export const unifiedCreatePostSchema = k.union([
   articleSchema,
   photoSchema,
@@ -197,6 +279,9 @@ export const unifiedCreatePostSchema = k.union([
   linkSchema,
   announcementSchema,
   eventSchema,
+  recommendationSchema,
+  ratingSchema,
+  rankingSchema,
 ]);
 
 export type UnifiedCreatePost = kataxInfer<typeof unifiedCreatePostSchema>;
@@ -213,6 +298,9 @@ export const unifiedUpdatePostSchema = k.union([
   linkSchema.partial(),
   announcementSchema.partial(),
   eventSchema.partial(),
+  recommendationSchema.partial(),
+  ratingSchema.partial(),
+  rankingSchema.partial(),
 ]);
 
 export type UnifiedUpdatePost = kataxInfer<typeof unifiedUpdatePostSchema>;
