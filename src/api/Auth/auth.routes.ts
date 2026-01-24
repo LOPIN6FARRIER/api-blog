@@ -1,13 +1,18 @@
 import { Router, Request, Response } from "express";
-import { register, login, refreshAccessToken, logout } from "./auth.controller";
+import {
+  register,
+  login,
+  refreshAccessToken,
+  logout,
+} from "./auth.controller.js";
 import {
   validateRegister,
   validateLogin,
   validateRefreshToken,
-} from "./auth.validator";
+} from "./auth.validator.js";
 
-import { requireAuth } from "./auth.midleware";
-import { sendResponse } from "../../shared/api.utils";
+import { requireAuth } from "./auth.midleware.js";
+import { sendResponse } from "../../shared/api.utils.js";
 
 export const router = Router();
 

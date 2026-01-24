@@ -1,6 +1,6 @@
-import { RegisterData, LoginData, RefreshTokenData } from "./auth.validator";
-import { AuthResponse, JwtPayload } from "./auth.interfaces";
-import { User } from "./user.types";
+import { RegisterData, LoginData, RefreshTokenData } from "./auth.validator.js";
+import { AuthResponse, JwtPayload } from "./auth.interfaces.js";
+import { User } from "./user.types.js";
 import {
   ControllerResult,
   createErrorResult,
@@ -11,8 +11,8 @@ import {
   generateRefreshToken,
   verifyRefreshToken,
 } from "../../shared/jwt.utils";
-import { hashPassword, verifyPassword } from "../../shared/password.util";
-import pool from "../../database/connection";
+import { hashPassword, verifyPassword } from "../../shared/password.util.js";
+import pool from "../../database/connection.js";
 
 /**
  * Registrar un nuevo usuario

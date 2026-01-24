@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { JwtPayload } from "./auth.interfaces";
-import { verifyAccessToken } from "../../shared/jwt.utils";
+import { JwtPayload } from "./auth.interfaces.js";
+import { verifyAccessToken } from "../../shared/jwt.utils.js";
 
 // Extender Request de Express para incluir user
 declare global {

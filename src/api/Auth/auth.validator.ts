@@ -1,7 +1,7 @@
 import { k, kataxInfer } from "katax-core";
 import type { AsyncValidator } from "katax-core";
-import pool from "../../database/connection";
-import { ValidationResult } from "../../shared/api.utils";
+import pool from "../../database/connection.js";
+import { ValidationResult } from "../../shared/api.utils.js";
 
 // ==================== VALIDADORES ASÍNCRONOS ====================
 
