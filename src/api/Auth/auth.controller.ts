@@ -5,12 +5,12 @@ import {
   ControllerResult,
   createErrorResult,
   createSuccessResult,
-} from "../../shared/api.utils";
+} from "../../shared/api.utils.js";
 import {
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
-} from "../../shared/jwt.utils";
+} from "../../shared/jwt.utils.js";
 import { hashPassword, verifyPassword } from "../../shared/password.util.js";
 import pool from "../../database/connection.js";
 
