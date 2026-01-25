@@ -23,6 +23,10 @@ try {
   console.error(`[upload.middleware] Failed to create images directory: ${imagesDir}`, err);
 }
 
+// Defaults: 5 MB per file, up to 20 files per request
+const maxFileSize = process.env.UPLOAD_MAX_FILE_SIZE ? Number(process.env.UPLOAD_MAX_FILE_SIZE) : 5 * 1024 * 1024; // bytes
+const maxFiles = process.env.UPLOAD_MAX_FILES ? Number(process.env.UPLOAD_MAX_FILES) : 20;
+
 const storage = multer.diskStorage({
   destination: function (_req: Request, _file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) {
     cb(null, path.resolve(imagesDir));
@@ -41,7 +45,9 @@ function fileFilter(_req: Request, file: Express.Multer.File, cb: multer.FileFil
   cb(null, true);
 }
 
-const upload = multer({ storage, fileFilter, limits: { fileSize: 10 * 1024 * 1024 } });
+// Limits are configurable via environment variables:
+// UPLOAD_MAX_FILE_SIZE (bytes), UPLOAD_MAX_FILES (number of files per request)
+const upload = multer({ storage, fileFilter, limits: { fileSize: maxFileSize, files: maxFiles } });
 
 export default upload;
 export { imagesDir };
