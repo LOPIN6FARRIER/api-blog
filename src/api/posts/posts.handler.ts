@@ -116,6 +116,14 @@ export async function uploadPostImageHandler(
 
       // Build full public URL (images are served at /images)
       const publicUrl = buildImageUrl(req, file.filename);
+      
+      // Build thumbnail URLs if available (agregadas por el middleware)
+      const fileWithThumbs = file as any;
+      const thumbnailUrls = fileWithThumbs.thumbnails ? {
+        small: buildImageUrl(req, fileWithThumbs.thumbnails.small),
+        medium: buildImageUrl(req, fileWithThumbs.thumbnails.medium),
+        large: buildImageUrl(req, fileWithThumbs.thumbnails.large),
+      } : undefined;
 
       return {
         isValid: true,
@@ -124,6 +132,7 @@ export async function uploadPostImageHandler(
           filename: file.filename,
           publicUrl,
           filepath: file.path,
+          thumbnails: thumbnailUrls,
         },
       } as any;
     },
@@ -170,12 +179,20 @@ export async function uploadPostImagesHandler(
         }
       }
 
-      const items = files.map((f, idx) => ({
-        filename: f.filename,
-        filepath: f.path,
-        publicUrl: buildImageUrl(req, f.filename),
-        meta: metadata?.[idx],
-      }));
+      const items = files.map((f, idx) => {
+        const fileWithThumbs = f as any;
+        return {
+          filename: f.filename,
+          filepath: f.path,
+          publicUrl: buildImageUrl(req, f.filename),
+          thumbnails: fileWithThumbs.thumbnails ? {
+            small: buildImageUrl(req, fileWithThumbs.thumbnails.small),
+            medium: buildImageUrl(req, fileWithThumbs.thumbnails.medium),
+            large: buildImageUrl(req, fileWithThumbs.thumbnails.large),
+          } : undefined,
+          meta: metadata?.[idx],
+        };
+      });
 
       return { isValid: true, data: { id: idCheck.data!.id, items } } as any;
     },
