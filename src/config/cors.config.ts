@@ -7,11 +7,9 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 const allowAllOrigins = allowedOrigins.includes("*");
 
 export const corsOptions: CorsOptions = {
-  origin: (origin, callback) => {
+  origin: allowAllOrigins ? true : (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
-    // If env contains '*' allow any origin (will reflect request origin)
-    if (allowAllOrigins) return callback(null, true);
 
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -22,5 +20,7 @@ export const corsOptions: CorsOptions = {
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  exposedHeaders: ["Content-Length", "Content-Type"],
+  preflightContinue: false,
 };

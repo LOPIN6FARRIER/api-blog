@@ -9,8 +9,13 @@ import { imagesDir } from './middleware/upload.middleware.js';
 
 const app = express();
 
-// Middleware
+// CORS debe ir primero, antes de cualquier otro middleware
 app.use(cors(corsOptions));
+
+// Handle preflight requests for all routes
+app.options('*', cors(corsOptions));
+
+// Other middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);

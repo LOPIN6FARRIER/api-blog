@@ -29,6 +29,7 @@ router.post("/from-spotify", createMusicPostFromSpotifyHandler);
 router.get("/:idOrSlug", getPostHandler);
 
 // Upload image for a post (field name: image) - CON OPTIMIZACIÓN
+router.options("/:id/image", (req, res) => res.sendStatus(200));
 router.post(
   "/:id/image",
   upload.single("image"),
@@ -39,6 +40,7 @@ router.post(
 // Upload multiple images for a post (field name: images[]) - CON OPTIMIZACIÓN
 import { uploadPostImagesHandler } from "./posts.handler.js";
 
+router.options("/:id/images", (req, res) => res.sendStatus(200));
 router.post(
   "/:id/images",
   upload.array("images"),
