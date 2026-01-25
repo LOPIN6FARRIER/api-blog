@@ -9,7 +9,10 @@ import {
   uploadPostImageHandler,
 } from "./posts.handler.js";
 import upload from "../../middleware/upload.middleware.js";
-import { optimizeImage, optimizeImages } from "../../middleware/image-optimizer.middleware.js";
+import {
+  optimizeImage,
+  optimizeImages,
+} from "../../middleware/image-optimizer.middleware.js";
 
 const router = Router();
 
@@ -26,12 +29,22 @@ router.post("/from-spotify", createMusicPostFromSpotifyHandler);
 router.get("/:idOrSlug", getPostHandler);
 
 // Upload image for a post (field name: image) - CON OPTIMIZACIÓN
-router.post("/:id/image", upload.single("image"), optimizeImage(), uploadPostImageHandler);
+router.post(
+  "/:id/image",
+  upload.single("image"),
+  optimizeImage(),
+  uploadPostImageHandler,
+);
 
 // Upload multiple images for a post (field name: images[]) - CON OPTIMIZACIÓN
 import { uploadPostImagesHandler } from "./posts.handler.js";
 
-router.post("/:id/images", upload.array("images"), optimizeImages(), uploadPostImagesHandler);
+router.post(
+  "/:id/images",
+  upload.array("images"),
+  optimizeImages(),
+  uploadPostImagesHandler,
+);
 
 // Update
 router.put("/:id", updatePostHandler);

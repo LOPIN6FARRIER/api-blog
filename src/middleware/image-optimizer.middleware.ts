@@ -1,6 +1,6 @@
-import path from 'path';
-import fs from 'fs/promises';
-import type { Request, Response, NextFunction } from 'express';
+import path from "path";
+import fs from "fs/promises";
+import type { Request, Response, NextFunction } from "express";
 
 // Sharp será importado dinámicamente para evitar errores si no está instalado
 let sharp: any = null;
@@ -9,7 +9,7 @@ interface OptimizeOptions {
   maxWidth?: number;
   maxHeight?: number;
   quality?: number;
-  format?: 'jpeg' | 'png' | 'webp';
+  format?: "jpeg" | "png" | "webp";
   generateThumbnails?: boolean; // Generar thumbnails
 }
 
@@ -17,15 +17,15 @@ const defaultOptions: OptimizeOptions = {
   maxWidth: 1920,
   maxHeight: 1080,
   quality: 85,
-  format: 'webp', // WebP es más eficiente que JPEG/PNG
+  format: "webp", // WebP es más eficiente que JPEG/PNG
   generateThumbnails: true,
 };
 
 // Tamaños de thumbnails
 const THUMBNAIL_SIZES = [
-  { name: 'small', width: 150, height: 150 },
-  { name: 'medium', width: 400, height: 400 },
-  { name: 'large', width: 800, height: 800 },
+  { name: "small", width: 150, height: 150 },
+  { name: "medium", width: 400, height: 400 },
+  { name: "large", width: 800, height: 800 },
 ];
 
 /**
@@ -40,37 +40,45 @@ export function optimizeImage(options: OptimizeOptions = {}) {
       // Intentar importar sharp dinámicamente
       if (!sharp) {
         try {
-          sharp = (await import('sharp')).default;
+          sharp = (await import("sharp")).default;
         } catch (e) {
-          console.warn('[image-optimizer] Sharp no disponible, saltando optimización');
+          console.warn(
+            "[image-optimizer] Sharp no disponible, saltando optimización",
+          );
           return next();
         }
       }
 
       const file = (req as any).file as Express.Multer.File | undefined;
-      
+
       if (!file) {
         return next();
       }
 
       const originalPath = file.path;
       const ext = path.extname(file.originalname).toLowerCase();
-      
+
       // Solo procesar imágenes
-      if (!['.jpg', '.jpeg', '.png', '.webp'].includes(ext)) {
+      if (![".jpg", ".jpeg", ".png", ".webp"].includes(ext)) {
         return next();
       }
 
       console.log(`[image-optimizer] Optimizing: ${file.filename}`);
 
       // Crear nombre optimizado
-      const optimizedFilename = file.filename.replace(/\.[^.]+$/, `.${opts.format}`);
-      const optimizedPath = path.join(path.dirname(originalPath), optimizedFilename);
+      const optimizedFilename = file.filename.replace(
+        /\.[^.]+$/,
+        `.${opts.format}`,
+      );
+      const optimizedPath = path.join(
+        path.dirname(originalPath),
+        optimizedFilename,
+      );
 
       // Optimizar imagen principal
       await sharp(originalPath)
         .resize(opts.maxWidth, opts.maxHeight, {
-          fit: 'inside',
+          fit: "inside",
           withoutEnlargement: true,
         })
         .toFormat(opts.format!, { quality: opts.quality })
@@ -80,20 +88,28 @@ export function optimizeImage(options: OptimizeOptions = {}) {
       const thumbnails: any = {};
       if (opts.generateThumbnails) {
         for (const size of THUMBNAIL_SIZES) {
-          const thumbFilename = file.filename.replace(/\.[^.]+$/, `-${size.name}.${opts.format}`);
-          const thumbPath = path.join(path.dirname(originalPath), thumbFilename);
-          
+          const thumbFilename = file.filename.replace(
+            /\.[^.]+$/,
+            `-${size.name}.${opts.format}`,
+          );
+          const thumbPath = path.join(
+            path.dirname(originalPath),
+            thumbFilename,
+          );
+
           await sharp(originalPath)
             .resize(size.width, size.height, {
-              fit: 'cover',
-              position: 'center',
+              fit: "cover",
+              position: "center",
             })
             .toFormat(opts.format!, { quality: 75 }) // Menor calidad para thumbnails
             .toFile(thumbPath);
-          
+
           thumbnails[size.name] = thumbFilename;
         }
-        console.log(`[image-optimizer] Generated ${Object.keys(thumbnails).length} thumbnails`);
+        console.log(
+          `[image-optimizer] Generated ${Object.keys(thumbnails).length} thumbnails`,
+        );
       }
 
       // Eliminar archivo original
@@ -111,7 +127,7 @@ export function optimizeImage(options: OptimizeOptions = {}) {
       console.log(`[image-optimizer] Optimized: ${optimizedFilename}`);
       next();
     } catch (error) {
-      console.error('[image-optimizer] Error:', error);
+      console.error("[image-optimizer] Error:", error);
       next(error);
     }
   };
@@ -128,15 +144,17 @@ export function optimizeImages(options: OptimizeOptions = {}) {
       // Intentar importar sharp dinámicamente
       if (!sharp) {
         try {
-          sharp = (await import('sharp')).default;
+          sharp = (await import("sharp")).default;
         } catch (e) {
-          console.warn('[image-optimizer] Sharp no disponible, saltando optimización');
+          console.warn(
+            "[image-optimizer] Sharp no disponible, saltando optimización",
+          );
           return next();
         }
       }
 
       const files = (req as any).files as Express.Multer.File[] | undefined;
-      
+
       if (!files || files.length === 0) {
         return next();
       }
@@ -147,18 +165,24 @@ export function optimizeImages(options: OptimizeOptions = {}) {
         files.map(async (file) => {
           const originalPath = file.path;
           const ext = path.extname(file.originalname).toLowerCase();
-          
+
           // Solo procesar imágenes
-          if (!['.jpg', '.jpeg', '.png', '.webp'].includes(ext)) {
+          if (![".jpg", ".jpeg", ".png", ".webp"].includes(ext)) {
             return file;
           }
 
-          const optimizedFilename = file.filename.replace(/\.[^.]+$/, `.${opts.format}`);
-          const optimizedPath = path.join(path.dirname(originalPath), optimizedFilename);
+          const optimizedFilename = file.filename.replace(
+            /\.[^.]+$/,
+            `.${opts.format}`,
+          );
+          const optimizedPath = path.join(
+            path.dirname(originalPath),
+            optimizedFilename,
+          );
 
           await sharp(originalPath)
             .resize(opts.maxWidth, opts.maxHeight, {
-              fit: 'inside',
+              fit: "inside",
               withoutEnlargement: true,
             })
             .toFormat(opts.format!, { quality: opts.quality })
@@ -168,17 +192,23 @@ export function optimizeImages(options: OptimizeOptions = {}) {
           const thumbnails: any = {};
           if (opts.generateThumbnails) {
             for (const size of THUMBNAIL_SIZES) {
-              const thumbFilename = file.filename.replace(/\.[^.]+$/, `-${size.name}.${opts.format}`);
-              const thumbPath = path.join(path.dirname(originalPath), thumbFilename);
-              
+              const thumbFilename = file.filename.replace(
+                /\.[^.]+$/,
+                `-${size.name}.${opts.format}`,
+              );
+              const thumbPath = path.join(
+                path.dirname(originalPath),
+                thumbFilename,
+              );
+
               await sharp(originalPath)
                 .resize(size.width, size.height, {
-                  fit: 'cover',
-                  position: 'center',
+                  fit: "cover",
+                  position: "center",
                 })
                 .toFormat(opts.format!, { quality: 75 })
                 .toFile(thumbPath);
-              
+
               thumbnails[size.name] = thumbFilename;
             }
           }
@@ -193,14 +223,16 @@ export function optimizeImages(options: OptimizeOptions = {}) {
             mimetype: `image/${opts.format}`,
             thumbnails,
           };
-        })
+        }),
       );
 
       (req as any).files = optimizedFiles;
-      console.log(`[image-optimizer] Optimized ${optimizedFiles.length} images`);
+      console.log(
+        `[image-optimizer] Optimized ${optimizedFiles.length} images`,
+      );
       next();
     } catch (error) {
-      console.error('[image-optimizer] Error:', error);
+      console.error("[image-optimizer] Error:", error);
       next(error);
     }
   };
