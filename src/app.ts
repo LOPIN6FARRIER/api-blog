@@ -7,7 +7,7 @@ import { requestLogger } from "./middleware/logger.middleware.js";
 import { corsOptions } from "./config/cors.config.js";
 import { imagesDir } from "./middleware/upload.middleware.js";
 
-const app = express();
+export const app = express();
 
 // CORS debe ir primero, antes de cualquier otro middleware
 app.use(cors(corsOptions));

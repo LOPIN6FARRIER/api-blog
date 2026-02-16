@@ -65,14 +65,12 @@ export async function sendResponse<TValidation = any, TResponse = any>(
 
     if (!validationResult.isValid) {
       // Validation error
-      logger.warn(
-        {
-          method: req.method,
-          path: req.path,
-          errors: validationResult.errors,
-        },
-        "Validation failed",
-      );
+      logger.warn({
+        message: "Validation failed",
+        method: req.method,
+        path: req.path,
+        errors: validationResult.errors,
+      });
 
       res.status(400).json({
         success: false,
@@ -123,14 +121,12 @@ export async function sendResponse<TValidation = any, TResponse = any>(
     res.status(statusCode).json(response);
   } catch (error) {
     // Internal server error
-    logger.error(
-      {
-        err: error,
-        method: req.method,
-        path: req.path,
-      },
-      "Internal server error",
-    );
+    logger.error({
+      message: "Internal server error",
+      err: error,
+      method: req.method,
+      path: req.path,
+    });
 
     res.status(500).json({
       success: false,

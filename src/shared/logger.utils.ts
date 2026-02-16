@@ -1,70 +1,72 @@
-import pino from 'pino';
-
-const isDevelopment = process.env.NODE_ENV !== 'production';
+import { katax } from "katax-service-manager";
 
 /**
- * Pino logger configuration
- * - Pretty printing in development
- * - JSON logs in production
+ * Lazy logger proxy - forwards calls to katax.logger after init()
+ * This allows importing { logger } without causing errors before init()
  */
-export const logger = pino({
-  level: process.env.LOG_LEVEL || 'info',
-  transport: isDevelopment
-    ? {
-        target: 'pino-pretty',
-        options: {
-          colorize: true,
-          translateTime: 'HH:MM:ss',
-          ignore: 'pid,hostname'
-        }
-      }
-    : undefined,
-  formatters: {
-    level: (label) => {
-      return { level: label };
-    }
-  }
+export const logger = new Proxy({} as typeof katax.logger, {
+  get(_, prop: string) {
+    return (katax.logger as any)[prop];
+  },
 });
 
 /**
  * Log HTTP request
  */
-export function logRequest(method: string, url: string, statusCode: number, duration: number): void {
-  logger.info({
+export function logRequest(
+  method: string,
+  url: string,
+  statusCode: number,
+  duration: number,
+): void {
+  const payload = {
+    message: `${method} ${url} - ${statusCode} (${duration}ms)`,
     method,
     url,
     statusCode,
-    duration: `${duration}ms`
-  }, `${method} ${url} - ${statusCode} (${duration}ms)`);
+    duration: `${duration}ms`,
+  };
+
+  if (statusCode >= 500) {
+    // critical server error: broadcast live and persist to Redis
+    katax.logger.error({ ...payload, broadcast: true, persist: true });
+  } else if (statusCode >= 400) {
+    // client error: broadcast but don't force persist
+    katax.logger.warn({ ...payload, broadcast: true });
+  } else {
+    katax.logger.info({ ...payload, broadcast: true });
+  }
 }
 
 /**
  * Log error with context
  */
 export function logError(error: Error, context?: Record<string, any>): void {
-  logger.error({
+  katax.logger.error({
+    message: error.message,
     err: error,
-    ...context
-  }, error.message);
+    ...context,
+    broadcast: true,
+  });
 }
 
 /**
  * Log info message
  */
 export function logInfo(message: string, data?: Record<string, any>): void {
-  logger.info(data, message);
+  katax.logger.info({ message, ...data, broadcast: true });
 }
 
 /**
  * Log warning message
  */
 export function logWarning(message: string, data?: Record<string, any>): void {
-  logger.warn(data, message);
+  katax.logger.warn({ message, ...data, broadcast: true });
 }
 
 /**
- * Log debug message (only in development)
+ * Log debug message
  */
 export function logDebug(message: string, data?: Record<string, any>): void {
-  logger.debug(data, message);
+  katax.logger.debug({ message, ...data, broadcast: true });
 }

@@ -124,7 +124,7 @@ export async function getAboutMe(): Promise<ControllerResult<AboutMe>> {
 
     return createSuccessResult("AboutMe fetched successfully", aboutMe);
   } catch (error) {
-    logger.error("Error fetching About Me:", error);
+    logger.error({ message: "Error fetching About Me:", err: error });
     return createErrorResult("Failed to fetch About Me");
   }
 }
@@ -239,7 +239,7 @@ export async function updateAboutMe(
     return await getAboutMe();
   } catch (error) {
     await client.query("ROLLBACK");
-    logger.error("Error updating About Me:", error);
+    logger.error({ message: "Error updating About Me:", err: error });
     return createErrorResult("Failed to update About Me");
   } finally {
     client.release();
@@ -271,7 +271,7 @@ export async function addSkill(
 
     return await getAboutMe();
   } catch (error) {
-    logger.error("Error adding skill:", error);
+    logger.error({ message: "Error adding skill:", err: error });
     return createErrorResult("Failed to add skill");
   }
 }
@@ -294,7 +294,7 @@ export async function removeSkill(
 
     return await getAboutMe();
   } catch (error) {
-    logger.error("Error removing skill:", error);
+    logger.error({ message: "Error removing skill:", err: error });
     return createErrorResult("Failed to remove skill");
   }
 }
@@ -323,7 +323,7 @@ export async function addInterest(
 
     return await getAboutMe();
   } catch (error) {
-    logger.error("Error adding interest:", error);
+    logger.error({ message: "Error adding interest:", err: error });
     return createErrorResult("Failed to add interest");
   }
 }
@@ -346,7 +346,7 @@ export async function removeInterest(
 
     return await getAboutMe();
   } catch (error) {
-    logger.error("Error removing interest:", error);
+    logger.error({ message: "Error removing interest:", err: error });
     return createErrorResult("Failed to remove interest");
   }
 }
@@ -377,7 +377,7 @@ export async function addSocial(data: {
 
     return await getAboutMe();
   } catch (error) {
-    logger.error("Error adding social:", error);
+    logger.error({ message: "Error adding social:", err: error });
     return createErrorResult("Failed to add social");
   }
 }
@@ -400,7 +400,7 @@ export async function removeSocial(
 
     return await getAboutMe();
   } catch (error) {
-    logger.error("Error removing social:", error);
+    logger.error({ message: "Error removing social:", err: error });
     return createErrorResult("Failed to remove social");
   }
 }

@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import { logger } from '../shared/logger.utils.js';
+import { Request, Response, NextFunction } from "express";
+import { logger } from "../shared/logger.utils.js";
 
 export interface ApiError extends Error {
   statusCode?: number;
@@ -9,24 +9,25 @@ export function errorMiddleware(
   err: ApiError,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void {
   const statusCode = err.statusCode || 500;
-  const message = err.message || 'Internal Server Error';
+  const message = err.message || "Internal Server Error";
 
   logger.error({
+    message,
     err,
     req: {
       method: req.method,
       url: req.url,
-      headers: req.headers
+      headers: req.headers,
     },
-    statusCode
-  }, message);
+    statusCode,
+  });
 
   res.status(statusCode).json({
     success: false,
     message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
   });
 }

@@ -632,7 +632,7 @@ export async function getPosts(q: PostsQuery): Promise<ControllerResult> {
       hasMorePages,
     );
   } catch (error) {
-    logger.error({ err: error }, "Error in getPosts");
+    logger.error({ message: "Error in getPosts", err: error });
     return createErrorResult(
       "Failed to list posts",
       error instanceof Error ? error.message : String(error),
@@ -670,7 +670,7 @@ export async function getPost(idOrSlug: string): Promise<ControllerResult> {
     const post = transformRowToPost(row);
     return createSuccessResult("Post found", post);
   } catch (error) {
-    logger.error({ err: error }, "Error in getPost");
+    logger.error({ message: "Error in getPost", err: error });
     return createErrorResult(
       "Failed to get post",
       error instanceof Error ? error.message : String(error),
@@ -972,7 +972,7 @@ export async function createPost(
     return createSuccessResult("Post created", { id: postId }, undefined, 201);
   } catch (error) {
     await client.query("ROLLBACK");
-    logger.error({ err: error }, "Error in createPost");
+    logger.error({ message: "Error in createPost", err: error });
     return createErrorResult(
       "Failed to create post",
       error instanceof Error ? error.message : String(error),
@@ -1237,7 +1237,7 @@ export async function updatePost(
     return createSuccessResult("Post updated", { id });
   } catch (error) {
     await client.query("ROLLBACK");
-    logger.error({ err: error }, "Error in updatePost");
+    logger.error({ message: "Error in updatePost", err: error });
     return createErrorResult(
       "Failed to update post",
       error instanceof Error ? error.message : String(error),
@@ -1257,7 +1257,7 @@ export async function deletePost(id: string): Promise<ControllerResult> {
       return createErrorResult("Not found", "Post not found", 404);
     return createSuccessResult("Post deleted", { id });
   } catch (error) {
-    logger.error({ err: error }, "Error in deletePost");
+    logger.error({ message: "Error in deletePost", err: error });
     return createErrorResult(
       "Failed to delete post",
       error instanceof Error ? error.message : String(error),
@@ -1461,7 +1461,7 @@ export async function attachImageToPost(data: {
     // For other types, just return the public URL (client can store where appropriate)
     return createSuccessResult("Image uploaded", { id, url: publicUrl });
   } catch (error) {
-    logger.error({ err: error }, "Error in attachImageToPost");
+    logger.error({ message: "Error in attachImageToPost", err: error });
     return createErrorResult(
       "Failed to attach image",
       error instanceof Error ? error.message : String(error),
@@ -1561,7 +1561,7 @@ export async function attachImagesToPost(data: {
         } catch (_) {}
       }
     } catch (_) {}
-    logger.error({ err: error }, "Error in attachImagesToPost");
+    logger.error({ message: "Error in attachImagesToPost", err: error });
     return createErrorResult(
       "Failed to attach images",
       error instanceof Error ? error.message : String(error),
@@ -1647,7 +1647,10 @@ export async function createMusicPostFromSpotify(data: {
 
     return await createPost(createData);
   } catch (error) {
-    logger.error({ err: error }, "Error in createMusicPostFromSpotify");
+    logger.error({
+      message: "Error in createMusicPostFromSpotify",
+      err: error,
+    });
     return createErrorResult(
       "Failed to create music post from Spotify",
       error instanceof Error ? error.message : String(error),
